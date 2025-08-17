@@ -10,12 +10,12 @@ fn main() -> io::Result<()> {
     let file_name = "tasks.json";
     let path = Path::new(file_name);
     if path.exists() {
-        println!("{} exists",file_name);
+        // println!("{} exists",file_name);
     }
     else {
         println!("{} not found",file_name);
         File::create(file_name).expect("Failed to create file");
-        println!("{} created",file_name);
+        // println!("{} created",file_name);
     }
 
     if args.len() <= 1 {
@@ -45,23 +45,34 @@ fn main() -> io::Result<()> {
                 }
                 else {
                     let len = file_lines.len();
+                    let mut task_added = false;
+                    let file = OpenOptions::new().write(true).truncate(true).open(file_name)?;
+                    let mut writer  = BufWriter::new(file);
                     for i in 1..len-1 {
                         if i == len-2 {
+                            task_added = true;
                             file_lines[i].push(',');
                             let parts: Vec<&str> = file_lines[i].trim_matches(&[' ','{','}'][..]).split(',').collect();
                             let last_id: Vec<&str> = parts[0].split(":").collect();
                             let new_id: u32 = last_id[1].parse::<u32>().unwrap();
                             json_string = format!("{{\"id\":{}, \"task\":\"{}\"}}",new_id+1,args[2]);
                             file_lines.insert(i+1, json_string);
-
-                            let file = OpenOptions::new().write(true).truncate(true).open(file_name)?;
-                            let mut writer  = BufWriter::new(file);
                             for line in &file_lines {
                                 writeln!(writer,"{}",line)?;
                             }
+                            writer.flush()?;
                         }
                     }
+                    if !task_added {
+                        json_string = format!("{{\"id\":{}, \"task\":\"{}\"}}",1,args[2]);
+                        file_lines.insert(1,json_string);
+                        for line in file_lines {
+                            writeln!(writer,"{}",line)?;
+                        }
+                        writer.flush()?;
+                    }
                 }
+                println!("Task added successfully");
             }
         }
         "delete" => {
@@ -69,7 +80,44 @@ fn main() -> io::Result<()> {
                 println!("Missing a <id>, for help use --help");
             }
             else {
-                println!("deleting a task");
+                let id: u16 = args[2].parse::<u16>().unwrap();
+                let file = OpenOptions::new().read(true).open(file_name)?;
+                let reader = BufReader::new(file);
+                let mut file_lines: Vec<String> = reader.lines().collect::<Result<_, _>>()?;
+                if file_lines.len() == 0 {
+                    println!("No task with id {} to delete",id);
+                }
+                else {
+                    let length = file_lines.len();
+                    let mut task_found = false;
+                    for i in 1..length-1 {
+                        let line: Vec<&str> = file_lines[i].trim_matches(&[' ','{','}'][..]).split(',').collect();
+                        let parts: Vec<&str> = line[0].split(':').collect();
+                        let task_id: u16 = parts[1].parse::<u16>().unwrap();
+                        if task_id == id {
+                            task_found = true;
+                            if i == length-2 {
+                                file_lines[i-1] = file_lines[i-1].trim_end_matches(',').to_string();
+                                file_lines.remove(i);
+                            }
+                            else {
+                                file_lines.remove(i);
+                            }
+                            break;
+                        }
+                    }
+                    if task_found {
+                        let file = OpenOptions::new().write(true).truncate(true).open(file_name)?;
+                        let mut writer = BufWriter::new(file);
+                        for line in file_lines {
+                            writeln!(writer,"{}",line)?;
+                        }
+                        println!("Task {} is deleted",id);
+                    }
+                    else {
+                        println!("No task with id {} to delete",id);
+                    }
+                }
             }
         }
         "update" => {
