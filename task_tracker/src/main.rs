@@ -29,23 +29,37 @@ fn main() -> io::Result<()> {
                 println!("Missing a <task>, for help use --help");
             }
             else{
-                let file = File::open(file_name)?;
+                let file = OpenOptions::new().read(true).open(file_name)?;
                 let reader = BufReader::new(file);
-                let file_lines: Vec<String> = reader.lines().collect::<Result<_, _>>()?;
+                let mut file_lines: Vec<String> = reader.lines().collect::<Result<_, _>>()?;
+                let mut json_string;
                 if file_lines.len() == 0 {
                     let file = OpenOptions::new().append(true).create(true).open(file_name)?;
                     let mut writer = BufWriter::new(file);
                     writeln!(writer,"[")?;
                     let id: u16 = 1;
-                    let json_string = format!("{{\"id\":{}, \"task\":\"{}\"}}",id,args[2]);
+                    json_string = format!("{{\"id\":{}, \"task\":\"{}\"}}",id,args[2]);
                     writeln!(writer,"{}",json_string)?;
                     writeln!(writer,"]")?;
                     writer.flush()?;
                 }
                 else {
-                    for line in &file_lines[1..file_lines.len()-1] {
-                        let parts: Vec<&str> = line.trim_matches(&[' ','{',',','}'][..]).split(",").collect();
-                        println!("{:?}", parts);
+                    let len = file_lines.len();
+                    for i in 1..len-1 {
+                        if i == len-2 {
+                            file_lines[i].push(',');
+                            let parts: Vec<&str> = file_lines[i].trim_matches(&[' ','{','}'][..]).split(',').collect();
+                            let last_id: Vec<&str> = parts[0].split(":").collect();
+                            let new_id: u32 = last_id[1].parse::<u32>().unwrap();
+                            json_string = format!("{{\"id\":{}, \"task\":\"{}\"}}",new_id+1,args[2]);
+                            file_lines.insert(i+1, json_string);
+
+                            let file = OpenOptions::new().write(true).truncate(true).open(file_name)?;
+                            let mut writer  = BufWriter::new(file);
+                            for line in &file_lines {
+                                writeln!(writer,"{}",line)?;
+                            }
+                        }
                     }
                 }
             }
