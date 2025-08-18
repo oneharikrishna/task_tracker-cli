@@ -2,11 +2,11 @@ use std::env;
 use std::fs::{File, OpenOptions};
 use std::path::Path;
 use std::io::{self, BufRead, BufReader, BufWriter, Write};
-// use chrono::Local;
+use chrono::Utc;
 
 fn main() -> io::Result<()> {
     let args: Vec<String> = env::args().collect();
-    
+    let get_now = || Utc::now();
     let file_name = "tasks.json";
     let path = Path::new(file_name);
     if path.exists() {
@@ -37,8 +37,8 @@ fn main() -> io::Result<()> {
                     let file = OpenOptions::new().append(true).create(true).open(file_name)?;
                     let mut writer = BufWriter::new(file);
                     writeln!(writer,"[")?;
-                    let id: u16 = 1;
-                    json_string = format!("{{\"id\":{}, \"task\":\"{}\"}}",id,args[2]);
+                    let now = get_now();
+                    json_string = format!("{{\"id\":{}, \"description\":\"{}\", \"status\":\"todo\", \"createdAt\":\"{}\", \"updatedAt\":\"\"}}",1,args[2],now.format("%Y-%m-%dT%H:%M:%SZ"));
                     writeln!(writer,"{}",json_string)?;
                     writeln!(writer,"]")?;
                     writer.flush()?;
@@ -55,7 +55,7 @@ fn main() -> io::Result<()> {
                             let parts: Vec<&str> = file_lines[i].trim_matches(&[' ','{','}'][..]).split(',').collect();
                             let last_id: Vec<&str> = parts[0].split(":").collect();
                             let new_id: u32 = last_id[1].parse::<u32>().unwrap();
-                            json_string = format!("{{\"id\":{}, \"task\":\"{}\"}}",new_id+1,args[2]);
+                            json_string = format!("{{\"id\":{}, \"description\":\"{}\", \"status\":\"todo\", \"createdAt\":\"{}\", \"updatedAt\":\"\"}}",new_id+1,args[2],get_now().format("%Y-%m-%dT%H:%M:%SZ"));
                             file_lines.insert(i+1, json_string);
                             for line in &file_lines {
                                 writeln!(writer,"{}",line)?;
@@ -64,7 +64,7 @@ fn main() -> io::Result<()> {
                         }
                     }
                     if !task_added {
-                        json_string = format!("{{\"id\":{}, \"task\":\"{}\"}}",1,args[2]);
+                        json_string = format!("{{\"id\":{}, \"description\":\"{}\", \"status\":\"todo\", \"createdAt\":\"{}\", \"updatedAt\":\"\"}}",1,args[2],get_now().format("%Y-%m-%dT%H:%M:%SZ"));
                         file_lines.insert(1,json_string);
                         for line in file_lines {
                             writeln!(writer,"{}",line)? ;
@@ -136,12 +136,15 @@ fn main() -> io::Result<()> {
                     let mut task_updated = false;
                     let length = file_lines.len();
                     for line in 1..length-1 {
+                        println!("{}",file_lines[line]);
                         let task: Vec<&str> = file_lines[line].trim_end_matches(',').trim_matches(&[' ','{','}'][..]).split(',').collect();
                         let id_part: Vec<&str> = task[0].split(':').collect();
                         let task_id: u16 = id_part[1].parse::<u16>().unwrap();
                         if task_id == id {
                             task_updated = true;
-                            let json_string = format!("{{\"id\":{}, \"task\":\"{}\"}}",id,args[3]);
+                            let status_part: Vec<&str> = task[2].split(':').collect();
+                            let created_at_part: Vec<&str> = task[3].splitn(2,':').collect();
+                            let json_string = format!("{{\"id\":{}, \"task\":\"{}\", \"status\":{}, \"createdAt\":{}, \"updatedAt\":\"{}\"}}",id, args[3], status_part[1], created_at_part[1], get_now().format("%Y-%m-%dT%H:%M:%SZ"));
                             file_lines[line] = json_string;
                             if line != length-2 {
                                 file_lines[line].push(',');
