@@ -1,4 +1,4 @@
 [
-{"id":1, "task":"testing update command"},
-{"id":3, "task":"testing update command - 2nd time"}
+{"id":3, "task":"checking new update command - 2nd time", "status":"todo", "createdAt":"2025-08-18T11:35:14Z", "updatedAt":"2025-08-18T11:36:00Z"},
+{"id":4, "description":"OnePiece", "status":"todo", "createdAt":"2025-08-18T11:37:16Z", "updatedAt":""}
 ]
