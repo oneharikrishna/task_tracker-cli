@@ -67,7 +67,7 @@ fn main() -> io::Result<()> {
                         json_string = format!("{{\"id\":{}, \"task\":\"{}\"}}",1,args[2]);
                         file_lines.insert(1,json_string);
                         for line in file_lines {
-                            writeln!(writer,"{}",line)?;
+                            writeln!(writer,"{}",line)? ;
                         }
                         writer.flush()?;
                     }
@@ -89,13 +89,13 @@ fn main() -> io::Result<()> {
                 }
                 else {
                     let length = file_lines.len();
-                    let mut task_found = false;
+                    let mut task_deleted = false;
                     for i in 1..length-1 {
                         let line: Vec<&str> = file_lines[i].trim_matches(&[' ','{','}'][..]).split(',').collect();
                         let parts: Vec<&str> = line[0].split(':').collect();
                         let task_id: u16 = parts[1].parse::<u16>().unwrap();
                         if task_id == id {
-                            task_found = true;
+                            task_deleted = true;
                             if i == length-2 {
                                 file_lines[i-1] = file_lines[i-1].trim_end_matches(',').to_string();
                                 file_lines.remove(i);
@@ -106,7 +106,7 @@ fn main() -> io::Result<()> {
                             break;
                         }
                     }
-                    if task_found {
+                    if task_deleted {
                         let file = OpenOptions::new().write(true).truncate(true).open(file_name)?;
                         let mut writer = BufWriter::new(file);
                         for line in file_lines {
@@ -125,7 +125,43 @@ fn main() -> io::Result<()> {
                 println!("Missing either <id> or <task>, for help use --help");
             }
             else{
-                println!("updating a task");
+                let id: u16 = args[2].parse::<u16>().unwrap();
+                let file = OpenOptions::new().read(true).open(file_name)?;
+                let reader = BufReader::new(file);
+                let mut file_lines: Vec<String> = reader.lines().collect::<Result<_, _>>()?;
+                if file_lines.len() == 0 {
+                    println!("No task with {} to update", id);
+                }
+                else {
+                    let mut task_updated = false;
+                    let length = file_lines.len();
+                    for line in 1..length-1 {
+                        let task: Vec<&str> = file_lines[line].trim_end_matches(',').trim_matches(&[' ','{','}'][..]).split(',').collect();
+                        let id_part: Vec<&str> = task[0].split(':').collect();
+                        let task_id: u16 = id_part[1].parse::<u16>().unwrap();
+                        if task_id == id {
+                            task_updated = true;
+                            let json_string = format!("{{\"id\":{}, \"task\":\"{}\"}}",id,args[3]);
+                            file_lines[line] = json_string;
+                            if line != length-2 {
+                                file_lines[line].push(',');
+                            }
+                            break;
+                        }
+                    }
+                    if task_updated {
+                        let file = OpenOptions::new().write(true).truncate(true).open(file_name)?;
+                        let mut writer = BufWriter::new(file);
+                        for line in file_lines {
+                            writeln!(writer,"{}",line)?;
+                        }
+                        writer.flush()?;
+                        println!("Task {} updated",id);
+                    }
+                    else {
+                        println!("No task with {} to update", id);
+                    }
+                }
             }
         }
         "mark-in-progress" => {
