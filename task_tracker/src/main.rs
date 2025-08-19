@@ -19,14 +19,14 @@ fn main() -> io::Result<()> {
     }
 
     if args.len() <= 1 {
-        println!("Welcome to Task Tracker use --help to know more");
+        println!("Welcome to Task Tracker use task_tracker_cli to know more");
         return Ok(());
     }
     
     match args[1].as_str(){
         "add" => {
             if args.len() < 3 {
-                println!("Missing a <task>, for help use --help");
+                println!("Missing a <task>, for help use task_tracker_cli");
             }
             else{
                 let file = OpenOptions::new().read(true).open(file_name)?;
@@ -77,7 +77,7 @@ fn main() -> io::Result<()> {
         }
         "delete" => {
             if args.len() < 3 {
-                println!("Missing a <id>, for help use --help");
+                println!("Missing a <id>, for help use task_tracker_cli");
             }
             else {
                 let id: u16 = args[2].parse::<u16>().unwrap();
@@ -122,7 +122,7 @@ fn main() -> io::Result<()> {
         }
         "update" => {
             if args.len() < 4 {
-                println!("Missing either <id> or <task>, for help use --help");
+                println!("Missing either <id> or <task>, for help use task_tracker_cli");
             }
             else{
                 let id: u16 = args[2].parse::<u16>().unwrap();
@@ -168,7 +168,7 @@ fn main() -> io::Result<()> {
         }
         "mark-in-progress" => {
             if args.len() < 3 {
-                println!("Missing <id>, for help use --help");
+                println!("Missing <id>, for help use task_tracker_cli");
             }
             else {
                 let file = OpenOptions::new().read(true).open(file_name)?;
@@ -216,7 +216,7 @@ fn main() -> io::Result<()> {
         }
         "mark-done" => {
             if args.len() < 3 {
-                println!("Missing <id>, for help use --help");
+                println!("Missing <id>, for help use task_tracker_cli");
             }
             else {
                 let file = OpenOptions::new().read(true).open(file_name)?;
@@ -338,11 +338,21 @@ fn main() -> io::Result<()> {
                 }
             }
         }
-        "--help" => {
-            
+        "task_tracker_cli" => {
+            println!("Welcome to Task Tracker CLI");
+            println!("Commands to try");
+            println!("add <id>, id -> integer");
+            println!("delete <id>, id -> integer");
+            println!("update <id> <description>, id -> integer, description -> string");
+            println!("mark-in-progress <id>, id -> integer");
+            println!("mark-done <id>, id -> integer");
+            println!("list");
+            println!("list todo");
+            println!("list in-progress");
+            println!("list done");
         }
         _ => {
-            println!("unknown command : {}",args[1]);
+            println!("unknown command : {} use task_tracker_cli to know",args[1]);
         }
     }
     Ok(())
