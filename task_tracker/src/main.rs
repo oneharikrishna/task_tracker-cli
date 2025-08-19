@@ -265,7 +265,77 @@ fn main() -> io::Result<()> {
         }
         "list" => {
             if args.len() == 2 {
-
+                let file = OpenOptions::new().read(true).open(file_name)?;
+                let reader = BufReader::new(file);
+                let file_lines: Vec<String> = reader.lines().collect::<Result<_, _>>()?;
+                if file_lines.len() <= 2 {
+                    println!("No tasks to display");
+                }
+                else{
+                    println!("Tasks are");
+                    for line in 1..file_lines.len()-1 {
+                        let task: Vec<&str> = file_lines[line].trim().trim_matches(&['{','}'][..]).splitn(5,",").collect();
+                        let description_part: Vec<&str> = task[1].split(":").collect();
+                        let status_part: Vec<&str> = task[2].split(":").collect();
+                        println!("Task : {} Status : {}",description_part[1],status_part[1]);
+                    }
+                }
+            }
+            if args.len() == 3 {
+                let file = OpenOptions::new().read(true).open(file_name)?;
+                let reader = BufReader::new(file);
+                let file_lines: Vec<String> = reader.lines().collect::<Result<_, _>>()?;
+                let length = file_lines.len();
+                match args[2].as_str() {
+                    "done" => {
+                        let mut done_tasks = false;
+                        for line in 1..length-1 {
+                            let task: Vec<&str> = file_lines[line].trim().trim_matches(&['{','}'][..]).splitn(5,",").collect();
+                            let status_part: Vec<&str> = task[2].split(":").map(|s| s.trim_matches('"')).collect();
+                            if status_part[1] == "done" {
+                                done_tasks = true;
+                                let description_part: Vec<&str> = task[1].split(":").collect();
+                                println!("Task : {}",description_part[1]);
+                            }
+                        }
+                        if !done_tasks {
+                            println!("No tasks are in done status");
+                        }
+                    }
+                    "in-progress" => {
+                        let mut in_progress_tasks = false;
+                        for line in 1..length-1 {
+                            let task: Vec<&str> = file_lines[line].trim().trim_matches(&['{','}'][..]).splitn(5,",").collect();
+                            let status_part: Vec<&str> = task[2].split(":").map(|s| s.trim_matches('"')).collect();
+                            if status_part[1] == "in-progress" {
+                                in_progress_tasks = true;
+                                let description_part: Vec<&str> = task[1].split(":").collect();
+                                println!("Task : {}",description_part[1]);
+                            }
+                        }
+                        if !in_progress_tasks {
+                            println!("No tasks are in in-progress status");
+                        }
+                    }
+                    "todo" => {
+                        let mut todo_tasks = false;
+                        for line in 1..length-1 {
+                            let task: Vec<&str> = file_lines[line].trim().trim_matches(&['{','}'][..]).splitn(5,",").collect();
+                            let status_part: Vec<&str> = task[2].split(":").map(|s| s.trim_matches('"')).collect();
+                            if status_part[1] == "todo" {
+                                todo_tasks = true;
+                                let description_part: Vec<&str> = task[1].split(":").collect();
+                                println!("Task : {}",description_part[1]);
+                            }
+                        }
+                        if !todo_tasks {
+                            println!("No tasks are in todo status");
+                        }
+                    }
+                    _ => {
+                        println!("unknown command pair to use with list : {}",args[2]);
+                    }
+                }
             }
         }
         "--help" => {
