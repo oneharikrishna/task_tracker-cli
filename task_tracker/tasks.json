@@ -1,5 +1,6 @@
 [
-{"id":1, "description":"OnePiece", "status":"in-progress", "createdAt":"2025-08-18T19:00:53Z", "updatedAt":""},
-{"id":2, "description":"AOT", "status":"in-progress", "createdAt":"2025-08-18T19:01:01Z", "updatedAt":""},
-{"id":3, "description":"28 Days Later", "status":"done", "createdAt":"2025-08-18T19:01:09Z", "updatedAt":"2025-08-18T19:01:35Z"}
+{"id":1, "description":"Watch OnePiece", "status":"in-progress", "createdAt":"2025-08-18T19:00:53Z", "updatedAt":"2025-08-19T10:18:58Z"},
+{"id":2, "description":"Watch AOT", "status":"in-progress", "createdAt":"2025-08-18T19:01:01Z", "updatedAt":"2025-08-19T10:19:06Z"},
+{"id":3, "description":"28 Days Later", "status":"done", "createdAt":"2025-08-18T19:01:09Z", "updatedAt":"2025-08-18T19:01:35Z"},
+{"id":4, "description":"Watch Fury", "status":"todo", "createdAt":"2025-08-19T08:59:12Z", "updatedAt":"2025-08-19T10:19:27Z"}
 ]
