@@ -11,8 +11,8 @@ task_tracker.exe add "Buy Groceries"
 task_tracker update 1 "Buy Groceries and cook"
 
 
-Thats it, If you have further doubts to clarify you can [Email me](harikrishna09876543@gmail.com)
+Thats it, If you have further doubts to clarify you can [Email me](mailto:harikrishna09876543@gmail.com)
 
-And I want to thanks [RoadMap](roadmap.sh) for this wonderful [opportunity](https://roadmap.sh/projects/task-tracker)
+And I want to thanks [RoadMap](https://roadmap.sh) for this wonderful [opportunity](https://roadmap.sh/projects/task-tracker)
 
 Just Keep Coding
